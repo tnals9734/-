@@ -375,9 +375,7 @@ const list = (m, s) => `<div class="panel">${D.filter(r => r.m === m && r.s === 
 const docList = (docs) => `<div class="panel">${docs.map(d => `<div class="frow"><span class="ft">${d[1].split(".").pop().toUpperCase()}</span><span class="fn">${d[0]}</span><a class="fd" href="${fileUrl(d[1])}" target="_blank" rel="noopener">다운로드</a></div>`).join("")}</div>`;
 
 function homeHTML(){
-  const cards = MENU.slice(1).map(m => `<button class="card" onclick="go('${m[0]}')"><div class="k">MENU</div><h3>${m[1]}</h3><p>${m[2].map(s => s[1]).join(" · ")}</p></button>`).join("");
-  return `<div class="sec">바로가기</div><div class="cards">${cards}</div>
-    <div class="sec">국가 탄소중립도시 지원기구</div>${list("org","about")}`;
+  return `<div class="sec">국가 탄소중립도시 지원기구</div>${list("org","about")}`;
 }
 
 function timelineHTML(){
@@ -472,7 +470,6 @@ function render(){
   if (S.m === "home") { main.innerHTML = homeHTML(); return; }
   const menu = MENU.find(m => m[0] === S.m);
   main.innerHTML = `<div class="layout">
-  
     <aside class="side">
       <div class="side-head">${menu[1]}</div>
       <ul>${menu[2].map(s => `<li><button class="${S.s === s[0] ? "on" : ""}" onclick="go('${S.m}','${s[0]}')"><span>${s[1]}</span><span class="arr">›</span></button></li>`).join("")}</ul>
