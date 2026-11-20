@@ -1,5 +1,4 @@
 import base64
-import json
 from pathlib import Path
 
 import streamlit as st
@@ -11,7 +10,6 @@ import streamlit.components.v1 as components
 st.set_page_config(page_title="탄소중립도시", page_icon="🌱", layout="wide")
 
 BASE_DIR = Path(__file__).parent          # 깃허브 저장소 최상위 폴더
-GITHUB_RAW = "https://raw.githubusercontent.com/tnals9734/-/main/"  # 파일 다운로드 주소
 PAGE_HEIGHT = 2600                        # 화면 높이(px). 아래가 잘리면 숫자를 키우세요.
 
 # 스트림릿 기본 여백·메뉴 숨기기 → 화면 꽉 채우기
@@ -36,13 +34,6 @@ def image_data(name):
     return f"data:{mime};base64," + base64.b64encode(p.read_bytes()).decode()
 
 
-# 저장소에 있는 자료 파일 목록 (돋보기 › 자료실)
-FILE_TYPES = {".pdf": "PDF", ".hwp": "HWP", ".pptx": "PPT", ".jpg": "이미지", ".png": "이미지"}
-files = [
-    {"name": p.name, "stem": p.stem, "type": FILE_TYPES[p.suffix.lower()]}
-    for p in sorted(BASE_DIR.iterdir())
-    if p.is_file() and p.suffix.lower() in FILE_TYPES
-]
 
 # ═════════════════════════════════════════════
 # 홈페이지 (HTML · CSS · JavaScript)
@@ -75,7 +66,7 @@ header{position:relative;z-index:30;background:#fff;border-bottom:1px solid #D5D
 
 /* 메뉴 */
 nav{position:relative;background:#fff;border-top:1px solid #E3EAF1}
-.navgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));max-width:1280px;margin:0 auto}
+.navgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));max-width:1280px;margin:0 auto}
 .nt{height:62px;padding:0 8px;background:none;border:0;border-bottom:3px solid transparent;font-size:17px;font-weight:700;color:#13263A;cursor:pointer}
 .nt.on{border-bottom-color:#00539A;color:#00539A;font-weight:900}
 .mega{display:none;position:absolute;left:0;right:0;top:100%;z-index:60;background:#fff;box-shadow:0 14px 26px rgba(19,38,58,.16);border-top:1px solid #E3EAF1;border-bottom:1px solid #D5DEE8}
@@ -222,19 +213,15 @@ footer{margin:0 48px;padding:24px 0 40px;border-top:1px solid #D5DEE8;font-size:
 <footer>© 국가 탄소중립도시 지원기구 K-water. All rights reserved.</footer>
 
 <script>
-const FILES = __FILES__;
 const IMG = {nowon: "__IMG_NOWON__", dangjin: "__IMG_DANGJIN__"};
-const RAW = "__RAW__";
-const fileUrl = (n) => RAW + encodeURIComponent(n);
 
 /* ───── 메뉴 구성 ───── */
 const MENU = [
-  ["home","홈",[]],
   ["cn","탄소중립",[["intro","탄소중립 소개"],["vision","비전 및 전략"]]],
   ["city","탄소중립도시",[["smart","스마트 그린도시"],["green","탄소중립 그린도시"],["pilot","탄소중립 선도도시"]]],
-  ["org","탄소중립 지원기구",[["about","기구 소개"],["history","추진경위"],["docs","운영 자료"]]],
+  ["org","탄소중립 지원기구",[["about","기구 소개"],["history","추진경위"]]],
   ["law","법체계 및 계획",[["act","탄소중립기본법"],["decree","시행령"],["plan","관련 계획"]]],
-  ["look","돋보기",[["files","자료실"],["policy","국내외 정책 동향"],["faq","탄소중립 궁금증"]]]
+  ["look","돋보기",[["policy","국내외 정책 동향"],["faq","탄소중립 궁금증"]]]
 ];
 const ML = {}, SL = {};
 MENU.forEach(m => { ML[m[0]] = m[1]; m[2].forEach(s => SL[m[0]+":"+s[0]] = s[1]); });
@@ -333,26 +320,13 @@ const D = [
 
 /* ───── 선도도시 ───── */
 const CITIES = [
- {id:"nowon",name:"서울 노원구",img:IMG.nowon,pdf:"(노원구)01_탄소중립 선도도시 기본계획(260709)_최종.pdf",vision:"82%를 뒤집는 도시, 인프라 없이 사람으로 줄이는 탄소",items:[["유형","노후주거지 효율화"],["중점 분야","건축물·수송: 건축물 에너지효율 개선 및 친환경 수송 확대"],["총사업비","1,084억원 · 30개 사업(신규 14개)"],["주요 사업","노원에너지제로주택 운영, 건물 에너지 통합관리 플랫폼 ‘제로빌’, 스마트 자전거도로, 도시형 태양광"]]},
- {id:"dangjin",name:"충남 당진",img:IMG.dangjin,pdf:"(당진시)01_탄소중립 선도도시 기본계획(260707)_최종.pdf",vision:"4,000MW를 끄고 90만 톤을 켜는 탄소중립도시, 당진",items:[["유형","탈석탄 전환"],["중점 분야","에너지·산업공정: 신재생에너지 전환을 통한 산업구조 개선"],["총사업비","3조 5,468억원 · 64개 사업(신규 19개)"],["주요 사업","염해지 태양광 조성, 석문 풍력발전단지, 수소도시 조성, 친환경 수산종합단지"]]},
- {id:"boryeong",name:"충남 보령",img:"",pdf:"",vision:"1.3GW로 부는 탄소중립의 바람",items:[["유형","탈석탄 전환"],["중점 분야","에너지: 신재생에너지 생산 및 활용 고도화"],["총사업비","4조 9,765억원 · 44개 사업(신규 18개)"],["주요 사업","해상풍력 집적화단지, 청정블루수소플랜트, 갯벌생태계 복원, 탄소중립 힐링파크"]]},
- {id:"jeju",name:"제주특별자치도",img:"",pdf:"",vision:"자연으로 채우는 에너지, 관광으로 덜어내는 탄소, 기후중립 섬 제주",items:[["유형","풍부한 재생에너지"],["중점 분야","건축물·수송: 건축물 에너지효율 개선 및 친환경 수송체계 구축"],["총사업비","8조 9,905억원 · 74개 사업(신규 8개)"],["주요 사업","전기자동차 보급, 곶자왈 보호, 공공주도 육해상 풍력자원 개발, 탄소흡수지도 DB 구축"]]},
- {id:"gumi",name:"경북 구미",img:"",pdf:"",vision:"기본계획 수립 중(’26.4~’27.3)",items:[["유형","노후산단"],["구분","’26 신규 대상지"],["기본계획","’26.4.27 위탁용역 계약(기후부↔K-water, 2.9억원), ’26.7.13 외주용역 착수(~’27.5.8)"]]}
+ {id:"nowon",name:"서울 노원구",img:IMG.nowon,vision:"82%를 뒤집는 도시, 인프라 없이 사람으로 줄이는 탄소",items:[["유형","노후주거지 효율화"],["중점 분야","건축물·수송: 건축물 에너지효율 개선 및 친환경 수송 확대"],["총사업비","1,084억원 · 30개 사업(신규 14개)"],["주요 사업","노원에너지제로주택 운영, 건물 에너지 통합관리 플랫폼 ‘제로빌’, 스마트 자전거도로, 도시형 태양광"]]},
+ {id:"dangjin",name:"충남 당진",img:IMG.dangjin,vision:"4,000MW를 끄고 90만 톤을 켜는 탄소중립도시, 당진",items:[["유형","탈석탄 전환"],["중점 분야","에너지·산업공정: 신재생에너지 전환을 통한 산업구조 개선"],["총사업비","3조 5,468억원 · 64개 사업(신규 19개)"],["주요 사업","염해지 태양광 조성, 석문 풍력발전단지, 수소도시 조성, 친환경 수산종합단지"]]},
+ {id:"boryeong",name:"충남 보령",img:"",vision:"1.3GW로 부는 탄소중립의 바람",items:[["유형","탈석탄 전환"],["중점 분야","에너지: 신재생에너지 생산 및 활용 고도화"],["총사업비","4조 9,765억원 · 44개 사업(신규 18개)"],["주요 사업","해상풍력 집적화단지, 청정블루수소플랜트, 갯벌생태계 복원, 탄소중립 힐링파크"]]},
+ {id:"jeju",name:"제주특별자치도",img:"",vision:"자연으로 채우는 에너지, 관광으로 덜어내는 탄소, 기후중립 섬 제주",items:[["유형","풍부한 재생에너지"],["중점 분야","건축물·수송: 건축물 에너지효율 개선 및 친환경 수송체계 구축"],["총사업비","8조 9,905억원 · 74개 사업(신규 8개)"],["주요 사업","전기자동차 보급, 곶자왈 보호, 공공주도 육해상 풍력자원 개발, 탄소흡수지도 DB 구축"]]},
+ {id:"gumi",name:"경북 구미",img:"",vision:"기본계획 수립 중(’26.4~’27.3)",items:[["유형","노후산단"],["구분","’26 신규 대상지"],["기본계획","’26.4.27 위탁용역 계약(기후부↔K-water, 2.9억원), ’26.7.13 외주용역 착수(~’27.5.8)"]]}
 ];
 
-/* ───── 운영·계획 자료 (파일 이름은 저장소와 똑같아야 합니다) ───── */
-const ORG_DOCS = [
- ["지원기구 업무계획","'23 탄소중립도시 지원기구 업무계획_최종f.hwp"],
- ["지원기구 운영계획","'23 탄소중립도시 지원기구 운영계획_2.hwp"],
- ["지원기구 운영 로드맵","'23년 지원기구 운영 로드맵.pptx"],
- ["지원기구 운영 로드맵 (그린도시)","'23년 지원기구 운영 로드맵_그린도시.pptx"],
- ["지원기구 공모 참여계획(방침)","지원기구 공모 참여계획(방침)_최종1.hwp"],
- ["협조체계 구축 계획(안)","탄소중립도시 지원기구 협조체계 구축 계획(안).hwp"]
-];
-const PLAN_DOCS = [
- ["탄소중립도시 추진계획(요약)","탄소중립도시 추진계획(요약)_최종.hwp"],
- ["탄소중립도시 추진계획","탄소중립도시 추진계획_최종2.hwp"]
-];
 
 /* ───── 상태 ───── */
 const S = {m:"home", s:"", q:"", city:"nowon", ftype:"전체", km:"12000", eff:"12"};
@@ -372,7 +346,6 @@ function rowHTML(r, withGo){
   </div></div>`;
 }
 const list = (m, s) => `<div class="panel">${D.filter(r => r.m === m && r.s === s).map(r => rowHTML(r)).join("")}</div>`;
-const docList = (docs) => `<div class="panel">${docs.map(d => `<div class="frow"><span class="ft">${d[1].split(".").pop().toUpperCase()}</span><span class="fn">${d[0]}</span><a class="fd" href="${fileUrl(d[1])}" target="_blank" rel="noopener">다운로드</a></div>`).join("")}</div>`;
 
 function homeHTML(){
   return `<div class="sec">국가 탄소중립도시 지원기구</div>${list("org","about")}`;
@@ -395,16 +368,9 @@ function pilotHTML(){
     <div class="city"><div class="info">
       <h3>${c.name}</h3><div class="lbl">비전</div><div class="vision">${c.vision}</div>
       <table class="it">${c.items.map(i => `<tr><th>${i[0]}</th><td>${i[1]}</td></tr>`).join("")}</table>
-      ${c.pdf ? `<a class="dl" href="${fileUrl(c.pdf)}" target="_blank" rel="noopener">⬇ 기본계획 PDF 받기</a>` : ""}
     </div>${c.img ? `<div class="pic"><img src="${c.img}" alt="${c.name} 선도도시 구상도"></div>` : ""}</div>`;
 }
 
-function filesHTML(){
-  const types = ["전체","PDF","HWP","PPT","이미지"];
-  const shown = FILES.filter(f => S.ftype === "전체" || f.type === S.ftype);
-  return `<div class="subs">${types.map(t => `<button class="sb ${S.ftype === t ? "on" : ""}" onclick="S.ftype='${t}';render()">${t}</button>`).join("")}</div>
-    <div class="panel">${shown.length ? shown.map(f => `<div class="frow"><span class="ft">${f.type}</span><span class="fn">${f.stem}</span><a class="fd" href="${fileUrl(f.name)}" target="_blank" rel="noopener">다운로드</a></div>`).join("") : `<div class="frow">자료가 없습니다.</div>`}</div>`;
-}
 
 function calcHTML(){
   const km = Math.max(0, Number(S.km) || 0), eff = Math.max(1, Number(S.eff) || 12);
@@ -430,9 +396,6 @@ function contentHTML(){
   if (S.m === "home") return homeHTML();
   if (k === "city:pilot") return pilotHTML();
   if (k === "org:history") return timelineHTML();
-  if (k === "org:docs") return docList(ORG_DOCS);
-  if (k === "law:plan") return list("law","plan") + `<div class="sec">관련 계획 자료</div>` + docList(PLAN_DOCS);
-  if (k === "look:files") return filesHTML();
   if (k === "look:faq") return calcHTML() + list("look","faq");
   return list(S.m, S.s);
 }
@@ -441,11 +404,9 @@ function searchHTML(q){
   const key = q.toLowerCase();
   const pool = D.concat(CITIES.map(c => ({m:"city", s:"pilot", tag:"선도도시", h:c.name, p:"비전: " + c.vision + "\n" + c.items.map(i => i[0] + ": " + i[1]).join("\n")})));
   const hits = pool.filter(r => [ML[r.m], SL[r.m+":"+r.s], r.tag, r.h, r.p, r.a, r.b].join(" ").toLowerCase().includes(key));
-  const fileHits = FILES.filter(f => f.name.toLowerCase().includes(key));
-  let html = `<div class="crumb">통합 검색</div><h2 class="ptitle">‘${q}’ 검색 결과 ${hits.length + fileHits.length}건</h2>`;
+  let html = `<div class="crumb">통합 검색</div><h2 class="ptitle">‘${q}’ 검색 결과 ${hits.length}건</h2>`;
   if (hits.length) html += `<div class="panel">${hits.map(r => rowHTML(Object.assign({}, r, {tag: ML[r.m] + " › " + SL[r.m+":"+r.s] + "<br>" + r.tag}), true)).join("")}</div>`;
-  if (fileHits.length) html += `<div class="sec">자료</div><div class="panel">${fileHits.map(f => `<div class="frow"><span class="ft">${f.type}</span><span class="fn">${f.stem}</span><a class="fd" href="${fileUrl(f.name)}" target="_blank" rel="noopener">다운로드</a></div>`).join("")}</div>`;
-  if (!hits.length && !fileHits.length) html += `<div class="empty">일치하는 내용이 없습니다. 다른 검색어를 입력해 보세요.</div>`;
+  if (!hits.length) html += `<div class="empty">일치하는 내용이 없습니다. 다른 검색어를 입력해 보세요.</div>`;
   return html;
 }
 
@@ -462,7 +423,7 @@ function render(){
     <section class="hero"><div class="c1"></div><div class="c2"></div><div class="in">
       <div class="eyebrow"><span></span>KOREA CENTER FOR NET-ZERO CITIES</div>
       <h1>탄소중립을 도시공간에 구현하는<br>탄소중립도시</h1>
-      <p>국가 탄소중립도시 지원기구 K-water가 탄소중립 선도도시를 비롯한 탄소중립도시 정책을 지원합니다.<br>상단 메뉴에서 탄소중립, 탄소중립도시, 지원기구, 법체계 및 계획을 확인해 보세요.</p>
+      <p>국가 탄소중립도시 지원기구 K-water가 탄소중립 선도도시를 비롯한 탄소중립도시 정책을 지원합니다.<br>상단 메뉴에서 탄소중립, 탄소중립도시, 지원기구, 법체계 및 계획, 돋보기를 확인해 보세요.</p>
     </div></section>` : "";
 
   const main = document.getElementById("main");
@@ -488,10 +449,8 @@ render();
 """
 
 page = (
-    PAGE.replace("__FILES__", json.dumps(files, ensure_ascii=False))
-    .replace("__IMG_NOWON__", image_data("노원.jpg"))
+    PAGE.replace("__IMG_NOWON__", image_data("노원.jpg"))
     .replace("__IMG_DANGJIN__", image_data("당진.jpg"))
-    .replace("__RAW__", GITHUB_RAW)
 )
 
 components.html(page, height=PAGE_HEIGHT, scrolling=True)
