@@ -142,6 +142,18 @@ table.it th{width:110px;text-align:left;background:#EEF5FB;color:#00539A;padding
 table.it td{padding:10px 14px;border-bottom:1px solid #DCE4EC;line-height:1.7;color:#31475C}
 .dl{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;border-radius:22px;background:#00539A;color:#fff !important;font-size:15px;font-weight:700}
 .dl:hover{background:#0B7BC9}
+.mapbox{flex:0 1 440px;min-width:280px}
+.kmap{width:100%;height:auto;display:block}
+.kmap .land{fill:#DCEBF7;stroke:#7FA6CC;stroke-width:1.5;stroke-linejoin:round}
+.pin{cursor:pointer;outline:none}
+.pin .dotc{fill:rgba(0,83,154,.75);stroke:#fff;stroke-width:3}
+.pin .lab{fill:#fff;stroke:#00539A;stroke-width:1.2}
+.pin text{font-size:14px;font-weight:700;fill:#00539A;font-family:'Noto Sans KR',sans-serif}
+.pin:hover .lab,.pin:focus .lab{fill:#EEF5FB}
+.pin.on .dotc{fill:#F08A00}
+.pin.on .lab{fill:#F08A00;stroke:#F08A00}
+.pin.on text{fill:#fff}
+.cimg{width:100%;height:auto;border:1px solid #DCE4EC;border-radius:6px;display:block;margin-top:4px}
 .empty{padding:28px;border:1px dashed #9FB4C9;border-radius:8px;font-size:16px;color:#4A6076;background:#fff}
 
 /* 자료실 */
@@ -329,7 +341,7 @@ const CITIES = [
 
 
 /* ───── 상태 ───── */
-const S = {m:"home", s:"", q:"", city:"nowon", ftype:"전체", km:"12000", eff:"12"};
+const S = {m:"home", s:"", q:"", city:"", km:"12000", eff:"12"};
 const firstSub = (m) => { const x = MENU.find(t => t[0] === m); return x && x[2].length ? x[2][0][0] : ""; };
 function go(m, s){ S.m = m; S.s = s || firstSub(m); S.q = ""; document.getElementById("q").value = ""; document.getElementById("nav").classList.remove("open"); render(); window.scrollTo(0,0); }
 function onSearch(v){ S.q = v; render(); }
@@ -360,17 +372,42 @@ function timelineHTML(){
   </div>`;
 }
 
-function pilotHTML(){
-  const c = CITIES.find(x => x.id === S.city) || CITIES[0];
-  return list("city","pilot") +
-    `<div class="sec">선도도시 둘러보기</div>
-    <div class="cities">${CITIES.map(x => `<button class="cb ${x.id === c.id ? "on" : ""}" onclick="S.city='${x.id}';render()">${x.name}</button>`).join("")}</div>
-    <div class="city"><div class="info">
-      <h3>${c.name}</h3><div class="lbl">비전</div><div class="vision">${c.vision}</div>
-      <table class="it">${c.items.map(i => `<tr><th>${i[0]}</th><td>${i[1]}</td></tr>`).join("")}</table>
-    </div>${c.img ? `<div class="pic"><img src="${c.img}" alt="${c.name} 선도도시 구상도"></div>` : ""}</div>`;
-}
+/* ───── 대한민국 지도 (위도·경도로 그림) ───── */
+const KOREA = [[37.75,126.6],[37.95,126.7],[38.05,127.0],[38.3,127.3],[38.3,127.8],[38.35,128.1],[38.6,128.35],
+ [38.2,128.6],[37.75,128.9],[37.45,129.15],[37.05,129.4],[36.6,129.45],[36.05,129.4],[36.08,129.57],[35.85,129.5],
+ [35.5,129.45],[35.3,129.3],[35.1,129.1],[35.05,128.9],[35.0,128.6],[34.85,128.45],[34.95,128.1],[34.9,127.75],
+ [34.7,127.6],[34.6,127.3],[34.5,127.0],[34.4,126.6],[34.3,126.5],[34.45,126.25],[34.8,126.4],[35.1,126.3],
+ [35.4,126.45],[35.6,126.5],[35.95,126.6],[36.1,126.55],[36.4,126.5],[36.6,126.3],[36.85,126.2],[36.95,126.45],
+ [37.0,126.8],[37.2,126.7],[37.45,126.6],[37.6,126.6]];
+const JEJU = [[33.56,126.55],[33.52,126.85],[33.45,126.95],[33.3,126.85],[33.22,126.6],[33.25,126.25],[33.35,126.15],[33.45,126.25]];
+const PIN = {nowon:[37.65,127.06,"r"], dangjin:[36.89,126.63,"l"], boryeong:[36.33,126.61,"l"], gumi:[36.12,128.34,"r"], jeju:[33.38,126.55,"r"]};
+const px = (lat, lon) => [((lon - 125.6) * 80 + 70).toFixed(1), ((38.8 - lat) * 100 + 10).toFixed(1)];
+const poly = (pts) => pts.map(p => px(p[0], p[1]).join(",")).join(" ");
 
+function mapSVG(){
+  const pins = CITIES.map(c => {
+    const p = PIN[c.id], xy = px(p[0], p[1]), on = S.city === c.id, x = +xy[0], y = +xy[1];
+    const w = c.name.length * 15 + 22, lx = p[2] === "l" ? x - 16 - w : x + 16;
+    return `<g class="pin ${on ? "on" : ""}" role="button" tabindex="0" aria-label="${c.name}" onclick="pickCity('${c.id}')" onkeydown="if(event.key==='Enter')pickCity('${c.id}')">
+      <circle cx="${x}" cy="${y}" r="${on ? 13 : 10}" class="dotc"/>
+      <rect x="${lx}" y="${y - 15}" width="${w}" height="30" rx="15" class="lab"/>
+      <text x="${lx + w / 2}" y="${y + 5}" text-anchor="middle">${c.name}</text></g>`;
+  }).join("");
+  return `<svg viewBox="0 0 440 610" class="kmap" role="img" aria-label="대한민국 지도: 탄소중립 선도도시 위치">
+    <polygon points="${poly(KOREA)}" class="land"/><polygon points="${poly(JEJU)}" class="land"/>${pins}</svg>`;
+}
+function pickCity(id){ S.city = S.city === id ? "" : id; render(); }
+
+function pilotHTML(){
+  const c = CITIES.find(x => x.id === S.city);
+  const detail = c ? `<h3>${c.name}</h3><div class="lbl">비전</div><div class="vision">${c.vision}</div>
+      <table class="it">${c.items.map(i => `<tr><th>${i[0]}</th><td>${i[1]}</td></tr>`).join("")}</table>
+      ${c.img ? `<img class="cimg" src="${c.img}" alt="${c.name} 선도도시 구상도">` : ""}`
+    : `<div class="empty">지도에서 지자체(노원구, 당진, 보령, 구미, 제주)를 눌러 확인해 보세요.</div>`;
+  return list("city","pilot") +
+    `<div class="sec">선도도시 지도</div>
+    <div class="city"><div class="mapbox">${mapSVG()}</div><div class="info">${detail}</div></div>`;
+}
 
 function calcHTML(){
   const km = Math.max(0, Number(S.km) || 0), eff = Math.max(1, Number(S.eff) || 12);
