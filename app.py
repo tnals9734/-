@@ -472,6 +472,7 @@ function render(){
   if (S.m === "home") { main.innerHTML = homeHTML(); return; }
   const menu = MENU.find(m => m[0] === S.m);
   main.innerHTML = `<div class="layout">
+  
     <aside class="side">
       <div class="side-head">${menu[1]}</div>
       <ul>${menu[2].map(s => `<li><button class="${S.s === s[0] ? "on" : ""}" onclick="go('${S.m}','${s[0]}')"><span>${s[1]}</span><span class="arr">›</span></button></li>`).join("")}</ul>
