@@ -172,12 +172,26 @@ table.it td{padding:10px 14px;border-bottom:1px solid #DCE4EC;line-height:1.7;co
 .msg{margin-top:22px;padding:16px 20px;background:#EEF5FB;border-left:4px solid #F08A00;font-size:16px;line-height:1.8}
 .note{margin-top:14px;font-size:13px;line-height:1.7;color:#4A6076}
 
+/* 왼쪽 세부메뉴 */
+.layout{display:flex;gap:40px;align-items:flex-start}
+.side{flex:0 0 240px;position:sticky;top:16px;background:#fff;border:1px solid #D5DEE8;border-radius:8px;overflow:hidden}
+.side-head{background:linear-gradient(115deg,#062C52 0%,#00539A 70%,#0B7BC9 100%);color:#fff;font-size:21px;font-weight:900;padding:30px 24px;letter-spacing:-.5px}
+.side ul{list-style:none;margin:0;padding:8px 0}
+.side li button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:52px;padding:10px 24px;background:none;border:0;border-left:4px solid transparent;font-size:16px;font-weight:500;color:#13263A;text-align:left;cursor:pointer;word-break:keep-all}
+.side li button:hover{background:#F4F7FA;color:#00539A}
+.side li button.on{background:#EEF5FB;border-left-color:#00539A;color:#00539A;font-weight:900}
+.side .arr{color:#9FB4C9;font-size:18px}
+.side li button.on .arr{color:#00539A}
+.content{flex:1;min-width:0}
+.content .ptitle{padding-bottom:16px;border-bottom:1px solid #D5DEE8}
+
 footer{margin:0 48px;padding:24px 0 40px;border-top:1px solid #D5DEE8;font-size:14px;color:#4A6076}
 
 @media (max-width:760px){
   .top,main,.hero{padding-left:20px;padding-right:20px}
   .navgrid{grid-template-columns:repeat(3,1fr)}
   .hero h1{font-size:34px}
+  .layout{flex-direction:column;gap:20px}.side{position:static;width:100%;flex:none}
   .tr,.tr.rev{flex-direction:row}.tc,.tr.rev .tc{align-items:flex-start}.tr>div:last-child{display:none}
 }
 </style>
@@ -457,10 +471,17 @@ function render(){
   if (searching) { main.innerHTML = searchHTML(q); return; }
   if (S.m === "home") { main.innerHTML = homeHTML(); return; }
   const menu = MENU.find(m => m[0] === S.m);
-  main.innerHTML = `<div class="crumb">홈 › ${menu[1]} › ${SL[S.m + ":" + S.s]}</div>
-    <h2 class="ptitle">${SL[S.m + ":" + S.s]}</h2>
-    <div class="subs">${menu[2].map(s => `<button class="sb ${S.s === s[0] ? "on" : ""}" onclick="go('${S.m}','${s[0]}')">${s[1]}</button>`).join("")}</div>
-    ${contentHTML()}`;
+  main.innerHTML = `<div class="layout">
+    <aside class="side">
+      <div class="side-head">${menu[1]}</div>
+      <ul>${menu[2].map(s => `<li><button class="${S.s === s[0] ? "on" : ""}" onclick="go('${S.m}','${s[0]}')"><span>${s[1]}</span><span class="arr">›</span></button></li>`).join("")}</ul>
+    </aside>
+    <section class="content">
+      <div class="crumb">홈 › ${menu[1]} › ${SL[S.m + ":" + S.s]}</div>
+      <h2 class="ptitle">${SL[S.m + ":" + S.s]}</h2>
+      ${contentHTML()}
+    </section>
+  </div>`;
 }
 render();
 </script>
